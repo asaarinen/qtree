@@ -48,12 +48,14 @@ qt.get({x:0, y: 0, w: 4, h: 4}, 2, function(obj) {
 });	     
 ```
 
-Alternatively, you can also iterate over all objects that are close to a line segment. The line segment is defined by having `x, y, dx, dy` properties:
+Alternatively, you can also iterate over all objects that are close to a line segment. The line segment is defined by having `x, y, dx, dy, dist` properties:
 
 ```javascript
 qt.get({x: 0, y: 0, dx: 1, dy: 1}, 1, function(obj) {
     // obj == {x: 5, y: 5, w: 0, h: 0, string: 'test'}
 });
 ```
+
+Please note it is assumed that `dx, dy` are a 2-d vector normalized to the length of 1. The `dist` property of the ray tells the length of the ray to this direction.
 
 You can also use a buffer threshold when iterating based on a line segment.
