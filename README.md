@@ -10,7 +10,7 @@ Installation
 npm install qtree
 ```
 
-Should also work in all browsers as is.
+Should also work in all browsers as is. `qtree` has no dependencies.
 
 Usage
 ---
