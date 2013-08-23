@@ -5,14 +5,19 @@
     "main": "qtree.js",
     "repository": {
 	"type": "git",
-    "url": "https://github.com/asaarinen/qtree.git"
+	"url": "https://github.com/asaarinen/qtree.git"
     },
     "author": "Antti Saarinen <antti.p.saarinen@gmail.com>",
-    "keywords": [ "quadtree", "spatial", "tree", "data structure" ],
+    "keywords": [
+	"quadtree",
+	"spatial",
+	"tree",
+	"data structure"
+    ],
+    "scripts": {
+	"test": "node test/test-qtree.js"
+    },
     "license": "MIT",
     "readmeFilename": "README.md",
-    "dependencies": {
-    },
-    "devDependencies": {
-    }
+    "dependencies": {}
 }
