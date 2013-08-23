@@ -1,5 +1,12 @@
 
+function distance(x1, y1, x2, y2) {
+    return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+}
+
 function distancePL(x, y, x1, y1, dx1, dy1, len1 ) {
+    if( !len1 ) // in case length is not provided, assume a line 
+	len1 = -1;
+
     // x = x1 + s * dx1 + t * dy1
     // y = y1 + s * dy1 - t * dx1
     // x * dy1 - y * dx1 = x1 * dy1 - y1 * dx1 + t * ( dy1 * dy1 + dx1 * dx1 )
@@ -65,6 +72,7 @@ function overlap_rect(o1, o2, buf) {
     return true;
 }
 
+
 function QuadTree(x, y, w, h, options) {
 
     if( typeof x != 'number' || isNaN(x) )
@@ -82,106 +90,110 @@ function QuadTree(x, y, w, h, options) {
 	    if( options.maxchildren > 0 )
 		maxchildren = options.maxchildren;
 
-    var children = [];
-    var leafs = [];
-    var nodes = [];
+    function createnode(x, y, w, h) {
+	return {
+	    x: x,
+	    y: y,
+	    w: w,
+	    h: h,
+	    children: [],
+	    leafs: [],
+	    nodes: []
+	}
+    }
 
-    function put_to_nodes(obj) {
+    var root = createnode(x, y, w, h);
+
+    function put_to_nodes(node, obj) {
 	var leaf = false;
-	if( obj.x < x ||
-	    obj.y < y ||
-	    obj.x + obj.w > x + w ||
-	    obj.y + obj.h > y + h )
+	if( obj.x < node.x ||
+	    obj.y < node.y ||
+	    obj.x + obj.w > node.x + node.w ||
+	    obj.y + obj.h > node.y + node.h )
 	    leaf = true;
 	var found = false;
-	for( var ni = 0; ni < nodes.length; ni++ )
-	    if( overlap_rect(obj, nodes[ni], 0) ) {
-		nodes[ni].put(obj);
+	for( var ni = 0; ni < node.nodes.length; ni++ )
+	    if( overlap_rect(obj, node.nodes[ni], 0) ) {
+		put(node.nodes[ni], obj);
 		found = true;
 	    }
 	if( !found || leaf )
-	    leafs.push(obj);
+	    node.leafs.push(obj);
     }
 
-    function put(obj) {
-	if( obj.w * obj.h >= w * h ) {
-	    leafs.push(obj);
+    function put(node, obj) {
+	if( obj.w * obj.h >= node.w * node.h ) {
+	    node.leafs.push(obj);
 	    return;
 	}
-	if( nodes.length == 0 ) {
-	    children.push(obj);
+	if( node.nodes.length == 0 ) {
+	    node.children.push(obj);
 	    
 	    // subdivide
-	    if( children.length > maxchildren ) {
-		nodes.push(QuadTree(x, y, w/2, h/2),
-			   QuadTree(x+w/2, y, w/2, h/2),
-			   QuadTree(x, y+h/2, w/2, h/2),
-			   QuadTree(x+w/2, y+h/2, w/2, h/2));
-		for( var ci = 0; ci < children.length; ci++ ) 
-		    put_to_nodes(children[ci]);
-		children = [];
+	    if( node.children.length > maxchildren ) {
+		var w2 = node.w / 2;
+		var h2 = node.h / 2;
+		node.nodes.push(createnode(node.x, node.y, w2, h2),
+				createnode(node.x + w2, node.y, w2, h2),
+				createnode(node.x, node.y + h2, w2, h2),
+				createnode(node.x + w2, node.y + h2, w2, h2));
+		for( var ci = 0; ci < node.children.length; ci++ ) 
+		    put_to_nodes(node, node.children[ci]);
+		node.children = [];
 	    }
 	} else 
-	    put_to_nodes(obj);
+	    put_to_nodes(node, obj);
     }
 
-    function get_rect(obj, buf, callback) {
-	for( var li = 0; li < leafs.length; li++ )
-	    if( !callback(leafs[li]) )
+    function getter(overlapfun, node, obj, buf, callback) {
+	for( var li = 0; li < node.leafs.length; li++ )
+	    if( !callback(node.leafs[li]) )
 		return false;
-	for( var li = 0; li < children.length; li++ )
-	    if( !callback(children[li]) )
+	for( var li = 0; li < node.children.length; li++ )
+	    if( !callback(node.children[li]) )
 		return false;
-	for( var ni = 0; ni < nodes.length; ni++ ) {
-	    if( overlap_rect(obj, nodes[ni], buf) ) {
-		if( !nodes[ni].get_rect(obj, buf, callback) )
+	for( var ni = 0; ni < node.nodes.length; ni++ ) {
+	    if( overlapfun(obj, node.nodes[ni], buf) ) {
+		if( !getter(overlapfun, node.nodes[ni], obj, buf, callback) )
 		    return false;
 	    }
 	}
 	return true;
     }
 
-    function get_ray(obj, buf, callback) {
-	for( var li = 0; li < leafs.length; li++ )
-	    if( !callback(leafs[li]) )
-		return false;
-	for( var li = 0; li < children.length; li++ )
-	    if( !callback(children[li]) )
-		return false;
-	for( var ni = 0; ni < nodes.length; ni++ )
-	    if( overlap_ray(obj, nodes[ni], buf) )
-		if( !nodes[ni].get_ray(obj, buf, callback) )
-		    return false;
-	return true;
+    function get_rect(node, obj, buf, callback) {
+	return getter(overlap_rect, node, obj, buf, callback);
     }
 
-    function get(obj, buf, callback) {
+    function get_ray(node, obj, buf, callback) {
+	return getter(overlap_ray, node, obj, buf, callback);
+    }
+
+    function get(node, obj, buf, callback) {
 	if( typeof buf == 'function' && typeof callback == 'undefined' ) {
 	    callback = buf;
 	    buf = 0;
 	}
 	if( obj == null )
-	    get_rect(obj, buf, callback);
+	    get_rect(node, obj, buf, callback);
 	else if( typeof obj.x == 'number' &&
 		 typeof obj.y == 'number' ) {
 	    if( typeof obj.dx == 'number' &&
 		typeof obj.dy == 'number' )
-		get_ray(obj, buf, callback);
+		get_ray(node, obj, buf, callback);
 	    else if( typeof obj.w == 'number' &&
 		     typeof obj.h == 'number' )
-		get_rect(obj, buf, callback);
+		get_rect(node, obj, buf, callback);
 	}
     }
 
     return {
-	x: x,
-	y: y, 
-	w: w,
-	h: h,
-	get: get,
-	put: put,
-	get_rect: get_rect,
-	get_ray: get_ray
+	get: function(obj, buf, callback) {
+	    get(root, obj, buf, callback);
+	},
+	put: function(obj) {
+	    put(root, obj);
+	}
     };
 }
 
