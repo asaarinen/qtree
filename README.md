@@ -58,6 +58,6 @@ qt.get({x: 0, y: 0, dx: 1, dy: 1}, 1, function(obj) {
 });
 ```
 
-Please note it is assumed that `dx, dy` are a 2-d vector normalized to the length of 1. The `dist` property of the ray tells the length of the ray to this direction. If `dist` is undefined or negative, it is assumed to be an infinite line instead of a line segment.
+Please note it is assumed that `dx, dy` are a 2-d vector normalized to the length of 1. The `dist` property of the object tells the length of the line segment to this direction. If `dist` is undefined or negative, it is assumed to be an infinite line instead of a line segment.
 
 You can also use a buffer threshold when iterating based on a line segment.
