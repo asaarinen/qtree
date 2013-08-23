@@ -39,8 +39,6 @@ function distancePL(x, y, x1, y1, dx1, dy1, len1 ) {
 }
 
 function overlap_ray(o1, o2, buf) {
-    if( !buf )
-	buf = 0;
     if( !o1 || !o2 )
 	return true;
     var dist = distancePL(o2.x + 0.5 * o2.w,
@@ -57,21 +55,18 @@ function overlap_ray(o1, o2, buf) {
 }
 
 function overlap_rect(o1, o2, buf) {
-    if( !buf )
-	buf = 0;
     if( !o1 || !o2 )
 	return true;
-    if( o1.x + o1.w < o2.x + buf ||
-	o1.y + o1.h < o2.y + buf ||
-	o1.x + buf > o2.x + o2.w ||
-	o1.y + buf > o2.y + o2.h )
+    if( o1.x + o1.w < o2.x - buf ||
+	o1.y + o1.h < o2.y - buf ||
+	o1.x - buf > o2.x + o2.w ||
+	o1.y - buf > o2.y + o2.h )
 	return false;
     return true;
 }
 
 function QuadTree(x, y, w, h, options) {
 
-    var maxchildren = 25;
     if( typeof x != 'number' || isNaN(x) )
 	x = 0;
     if( typeof y != 'number' || isNaN(y) )
@@ -81,6 +76,7 @@ function QuadTree(x, y, w, h, options) {
     if( typeof h != 'number' || isNaN(h) )
 	h = 10;
     
+    var maxchildren = 25;
     if( options )
 	if( typeof options.maxchildren == 'number' )
 	    if( options.maxchildren > 0 )
@@ -89,6 +85,23 @@ function QuadTree(x, y, w, h, options) {
     var children = [];
     var leafs = [];
     var nodes = [];
+
+    function put_to_nodes(obj) {
+	var leaf = false;
+	if( obj.x < x ||
+	    obj.y < y ||
+	    obj.x + obj.w > x + w ||
+	    obj.y + obj.h > y + h )
+	    leaf = true;
+	var found = false;
+	for( var ni = 0; ni < nodes.length; ni++ )
+	    if( overlap_rect(obj, nodes[ni], 0) ) {
+		nodes[ni].put(obj);
+		found = true;
+	    }
+	if( !found || leaf )
+	    leafs.push(obj);
+    }
 
     function put(obj) {
 	if( obj.w * obj.h >= w * h ) {
@@ -104,41 +117,42 @@ function QuadTree(x, y, w, h, options) {
 			   QuadTree(x+w/2, y, w/2, h/2),
 			   QuadTree(x, y+h/2, w/2, h/2),
 			   QuadTree(x+w/2, y+h/2, w/2, h/2));
-		for( var ci = 0; ci < children.length; ci++ )
-		    for( var ni = 0; ni < nodes.length; ni++ )
-			if( overlap(children[ci], nodes[ni]) )
-			    nodes[ni].put(children[ci]);
+		for( var ci = 0; ci < children.length; ci++ ) 
+		    put_to_nodes(children[ci]);
 		children = [];
 	    }
-	} else {
-	    for( var ni = 0; ni < nodes.length; ni++ )
-		if( overlap(obj, nodes[ni]) )
-		    nodes[ni].put(obj);
-	}
+	} else 
+	    put_to_nodes(obj);
     }
 
     function get_rect(obj, buf, callback) {
 	for( var li = 0; li < leafs.length; li++ )
 	    if( !callback(leafs[li]) )
-		return;
+		return false;
 	for( var li = 0; li < children.length; li++ )
 	    if( !callback(children[li]) )
-		return;
-	for( var ni = 0; ni < nodes.length; ni++ )
-	    if( overlap_rect(obj, nodes[ni], buf) )
-		nodes[ni].get_rect(obj, buf, callback);
+		return false;
+	for( var ni = 0; ni < nodes.length; ni++ ) {
+	    if( overlap_rect(obj, nodes[ni], buf) ) {
+		if( !nodes[ni].get_rect(obj, buf, callback) )
+		    return false;
+	    }
+	}
+	return true;
     }
 
     function get_ray(obj, buf, callback) {
 	for( var li = 0; li < leafs.length; li++ )
 	    if( !callback(leafs[li]) )
-		return;
+		return false;
 	for( var li = 0; li < children.length; li++ )
 	    if( !callback(children[li]) )
-		return;
+		return false;
 	for( var ni = 0; ni < nodes.length; ni++ )
-	    if( overlap_rect(obj, nodes[ni], buf) )
-		nodes[ni].get_ray(obj, buf, callback);
+	    if( overlap_ray(obj, nodes[ni], buf) )
+		if( !nodes[ni].get_ray(obj, buf, callback) )
+		    return false;
+	return true;
     }
 
     function get(obj, buf, callback) {
@@ -146,15 +160,16 @@ function QuadTree(x, y, w, h, options) {
 	    callback = buf;
 	    buf = 0;
 	}
-	if( typeof obj.x == 'number' &&
-	    typeof obj.y == 'number' ) {
+	if( obj == null )
+	    get_rect(obj, buf, callback);
+	else if( typeof obj.x == 'number' &&
+		 typeof obj.y == 'number' ) {
 	    if( typeof obj.dx == 'number' &&
-		typeof obj.dy == 'number' ) {
+		typeof obj.dy == 'number' )
 		get_ray(obj, buf, callback);
-	    } else if( typeof obj.w == 'number' &&
-		       typeof obj.h == 'number' ) {
+	    else if( typeof obj.w == 'number' &&
+		     typeof obj.h == 'number' )
 		get_rect(obj, buf, callback);
-	    }
 	}
     }
 
@@ -164,7 +179,9 @@ function QuadTree(x, y, w, h, options) {
 	w: w,
 	h: h,
 	get: get,
-	put: put
+	put: put,
+	get_rect: get_rect,
+	get_ray: get_ray
     };
 }
 
