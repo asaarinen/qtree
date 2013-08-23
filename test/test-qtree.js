@@ -18,7 +18,6 @@ for( var qti = 0; qti < qts.length; qti++ ) {
     var qt = qts[qti];
     assert(qt != null, 'constructor failed');
 
-    process.stderr.write('constructing qtree\n');
     var pts = [];
     for( var pi = 0; pi < 10000; pi++ ) {
 	var pt = {
@@ -31,22 +30,21 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 	pts.push(pt);
 	qt.put(pt);
     }
-    process.stderr.write('querying qtree\n');
     
-function overlap_rect(o1, o2, buf) {
-    if( !o1 || !o2 )
+    function overlap_rect(o1, o2, buf) {
+	if( !o1 || !o2 )
+	    return true;
+	if( o1.x + o1.w < o2.x - buf ||
+	    o1.y + o1.h < o2.y - buf ||
+	    o1.x - buf > o2.x + o2.w ||
+	    o1.y - buf > o2.y + o2.h )
+	    return false;
 	return true;
-    if( o1.x + o1.w < o2.x - buf ||
-	o1.y + o1.h < o2.y - buf ||
-	o1.x - buf > o2.x + o2.w ||
-	o1.y - buf > o2.y + o2.h )
-	return false;
-    return true;
-}
-
+    }
+    
     var areas = [];
     for( var ai = 0; ai < 100; ai++ ) {
-	process.stderr.write('testing area ' + ai + '\n');
+	//process.stderr.write('testing area ' + ai + '\n');
 	var area = {
 	    x: ( Math.random() - 0.5 ) * 100,
 	    y: ( Math.random() - 0.25 ) * 100,
@@ -67,21 +65,18 @@ function overlap_rect(o1, o2, buf) {
 
 	assert.deepEqual(result1, result2, 'passing buffer fails');
 
-	//process.stderr.write('testing ' + JSON.stringify(area)+'\n');
 	var result3 = {};
 	qt.get(area, buf, function(obj) {
-//	    process.stderr.write('found ' + obj.i+ '\n');
 	    result3[obj.i + ''] = true;
 	    return true;
 	});
 	for( var pi = 0; pi < pts.length; pi++ ) {
 	    var pt = pts[pi];
 	    if( overlap_rect(area, pt, buf) )
-//	    if( pt.x >= area.x - buf &&
-//		pt.x <= area.x + area.w + buf &&
-//		pt.y >= area.y - buf &&
-//		pt.y <= area.y + area.h + buf )
-		assert(result3[pt.i+''], 'invalid result: ' + JSON.stringify(area) + ' ' + JSON.stringify(pt) + ' ' + buf + ' ' + qti + ' ' + result3[pt.i+'']);
+		assert(result3[pt.i+''], 'invalid result: ' + 
+		       JSON.stringify(area) + ' ' + JSON.stringify(pt) + ' ' + 
+		       buf + ' ' + qti + ' ' + result3[pt.i+'']);
 	}
     }
 }
+process.stdout.write('tests ok\n');
