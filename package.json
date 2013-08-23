@@ -1,7 +1,7 @@
 {
-    "name": "qtree",
+    "name": "simple-quadtree",
     "version": "0.1.0",
-    "description": "qtree - simple quadtree structure",
+    "description": "quadtree data structure",
     "main": "qtree.js",
     "repository": {
 	"type": "git",

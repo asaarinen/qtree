@@ -7,7 +7,7 @@ Installation
 ---
 
 ```
-npm install qtree
+npm install simple-quadtree
 ```
 
 Should also work in all browsers as is. `qtree` has no dependencies.
