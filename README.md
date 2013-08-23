@@ -1,6 +1,8 @@
 qtree - a simple JavaScript quadtree
 =====
 
+`qtree` is a minimal quadtree implementation that supports simple `put` and `get` operations on objects having a `x, y` position and `w, h` dimension. 
+
 Installation
 ---
 
