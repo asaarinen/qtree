@@ -10,10 +10,15 @@ function QuadTree(x, y, w, h, options) {
 	h = 10;
     
     var maxchildren = 25;
-    if( options )
+    var leafratio = 0.5;
+    if( options ) {
 	if( typeof options.maxchildren == 'number' )
 	    if( options.maxchildren > 0 )
 		maxchildren = options.maxchildren;
+	if( typeof options.leafratio == 'number' )
+	    if( options.leafratio >= 0 )
+		leafratio = options.leafratio;
+    }
 
     // create a new quadtree node
     function createnode(x, y, w, h) {
@@ -112,18 +117,29 @@ function QuadTree(x, y, w, h, options) {
     // put an object to one of the child nodes of this node
     function put_to_nodes(node, obj) {
 	var leaf = false;
+	if( obj.w * obj.h > node.w * node.h * leafratio )
+	    leaf = true;
 	if( obj.x < node.x ||
 	    obj.y < node.y ||
 	    obj.x + obj.w > node.x + node.w ||
 	    obj.y + obj.h > node.y + node.h )
 	    leaf = true;
-	var found = false;
-	for( var ni = 0; ni < node.nodes.length; ni++ )
-	    if( overlap_rect(obj, node.nodes[ni], 0) ) {
-		put(node.nodes[ni], obj);
-		found = true;
-	    }
-	if( !found || leaf )
+
+	if( !leaf ) {
+	    var childnode = null;
+	    for( var ni = 0; ni < node.nodes.length; ni++ )
+		if( overlap_rect(obj, node.nodes[ni], 0) ) {
+		    if( childnode ) { // multiple hits
+			leaf = true;
+			break;
+		    } else
+			childnode = node.nodes[ni];
+		}
+	    if( !leaf )
+		put(childnode, obj);
+	} 
+
+	if( leaf )
 	    node.leafs.push(obj);
     }
 
