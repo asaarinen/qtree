@@ -35,6 +35,16 @@ function QuadTree(x, y, w, h, options) {
 	return true;
     }
 
+    // test for deep equality for x,y,w,h
+    function isequal(o1, o2) {
+	if( o1.x == o2.x &&
+	    o1.y == o2.y &&
+	    o1.w == o2.w &&
+	    o1.h == o2.h )
+	    return true;
+	return false;
+    }
+
     // create a new quadtree node
     function createnode(x, y, w, h) {
 	return {
@@ -172,20 +182,22 @@ function QuadTree(x, y, w, h, options) {
 	    return 0;
 
 	if( !attr )
-	    attr = 'id';
-	if( typeof attr != 'string' )
+	    attr = false;
+	else if( typeof attr != 'string' )
 	    attr = 'id';
 
 	var count = 0;
 	for( var ci = 0; ci < node.children.length; ci++ )
-	    if( node.children[ci][attr] == obj[attr] ) {
+	    if( ( attr && node.children[ci][attr] == obj[attr] ) ||
+		( !attr && isequal(node.children[ci], obj) ) ) {
 		count++;
 		node.children.splice(ci, 1);
 		ci--;
 	    }
 
 	for( var ci = 0; ci < node.leafs.length; ci++ )
-	    if( node.leafs[ci][attr] == obj[attr] ) {
+	    if( ( attr && node.leafs[ci][attr] == obj[attr] ) ||
+		( !attr && isequal(node.leafs[ci], obj) ) ) {
 		count++;
 		node.leafs.splice(ci, 1);
 		ci--;
