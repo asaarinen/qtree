@@ -1,7 +1,7 @@
-qtree - a simple JavaScript quadtree
+simple-quadtree - a simple JavaScript quadtree
 =====
 
-`qtree` is a minimal quadtree implementation that supports simple `put` and `get` operations on objects having a `x, y` position and `w, h` dimension. 
+`simple-quadtree` is a minimal quadtree implementation that supports simple `put` and `get` operations on objects having a `x, y` position and `w, h` dimension. 
 
 Installation
 ---
@@ -10,7 +10,7 @@ Installation
 npm install simple-quadtree
 ```
 
-Should also work in all browsers as is. `qtree` has no dependencies.
+Should also work in all browsers as is. `simple-quadtree` has no dependencies.
 
 Usage
 ---
@@ -18,11 +18,11 @@ Usage
 Create a quadtree by giving it some bounds, e.g. x, y, width and height
 
 ```javascript
-var QuadTree = require('qtree');
+var QuadTree = require('simple-quadtree');
 var qt = QuadTree(0, 0, 100, 100);
 ```
 
-You can also give `QuadTree` some options, the only option currently is the maximum number of children in a quadtree node until it is subdivided:
+You can also give `QuadTree` some options; currently, the only option is the maximum number of children in a quadtree node until it is subdivided:
 
 ```javascript
 var qt = QuadTree(0, 0, 100, 100, { maxchildren: 25 }); // defaults to 25
