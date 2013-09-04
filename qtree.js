@@ -145,10 +145,17 @@ function QuadTree(x, y, w, h, options) {
 
     // put an object to this node
     function put(node, obj) {
-	if( obj.w * obj.h >= node.w * node.h ) {
-	    node.leafs.push(obj);
+	if( !obj )
 	    return;
-	}
+	if( typeof obj.x != 'number' ||
+	    typeof obj.y != 'number' ||
+	    typeof obj.w != 'number' ||
+	    typeof obj.h != 'number' )
+	    return;
+	if( isNaN(obj.x) || isNaN(obj.y) ||
+	    isNaN(obj.w) || isNaN(obj.h) )
+	    return;
+
 	if( node.nodes.length == 0 ) {
 	    node.children.push(obj);
 	    
