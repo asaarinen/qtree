@@ -30,6 +30,15 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 	pts.push(pt);
 	qt.put(pt);
     }
+
+    var removed3 = {};
+    for( var pi = 0; pi < pts.length; pi++ ) {
+	if( Math.random() < 0.1 ) {
+	    assert(qt.remove(pts[pi], 'i') == 1);
+	    assert(qt.remove(pts[pi], 'i') == 0);
+	    removed3[pts[pi].i + ''] = true;
+	}
+    }
     
     function overlap_rect(o1, o2, buf) {
 	if( !o1 || !o2 )
@@ -51,16 +60,19 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 	    w: Math.pow(Math.random(), 3) * 100,
 	    h: Math.pow(Math.random(), 3) * 100
 	};
+
 	var buf = Math.max(0, Math.random() - 0.25);
 	var result1 = {};
 	qt.get(area, function(obj) {
 	    assert(!result1[obj.i + ''], 'duplicate get return');
+	    assert(!removed3[obj.i + ''], 'deleted object returned');
 	    result1[obj.i + ''] = true;
 	    return true;
 	});
 	var result2 = {};
 	qt.get(area, 0, function(obj) {
 	    assert(!result2[obj.i + ''], 'duplicate get return');
+	    assert(!removed3[obj.i + ''], 'deleted object returned');
 	    result2[obj.i + ''] = true;
 	    return true;
 	});
@@ -70,15 +82,21 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 	var result3 = {};
 	qt.get(area, buf, function(obj) {
 	    assert(!result3[obj.i + ''], 'duplicate get return');
+	    assert(!removed3[obj.i + ''], 'deleted object returned');
 	    result3[obj.i + ''] = true;
 	    return true;
 	});
 	for( var pi = 0; pi < pts.length; pi++ ) {
 	    var pt = pts[pi];
-	    if( overlap_rect(area, pt, buf) )
-		assert(result3[pt.i+''], 'invalid result: ' + 
+	    if( removed3[pt.i+''] )
+		continue;
+	    if( overlap_rect(area, pt, buf) ) {
+		assert(result3[pt.i+''], 
+		       'invalid result: ' + 
 		       JSON.stringify(area) + ' ' + JSON.stringify(pt) + ' ' + 
 		       buf + ' ' + qti + ' ' + result3[pt.i+'']);
+		delete result3[pt.i+'']; 
+	    }
 	}
     }
 }
