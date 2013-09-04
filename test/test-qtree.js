@@ -18,6 +18,15 @@ for( var qti = 0; qti < qts.length; qti++ ) {
     var qt = qts[qti];
     assert(qt != null, 'constructor failed');
 
+    var obj1 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
+    var obj2 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4234 };
+    
+    qt.put(obj1);
+    qt.put(obj2);
+    
+    assert(qt.remove(obj1, 'id') == 1); // only obj1 removed
+    assert(qt.remove(obj1) == 1); // obj2 removed
+
     var pts = [];
     for( var pi = 0; pi < 10000; pi++ ) {
 	var pt = {
