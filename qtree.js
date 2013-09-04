@@ -167,18 +167,23 @@ function QuadTree(x, y, w, h, options) {
     }
 
     // remove an object from this node
-    function remove(node, obj) {
+    function remove(node, obj, attr) {
 	if( !validate(obj) )
 	    return;
 
+	if( !attr )
+	    attr = 'id';
+	if( typeof attr != 'string' )
+	    attr = 'id';
+
 	for( var ci = 0; ci < node.children.length; ci++ )
-	    if( node.children[ci].id == obj.id ) {
+	    if( node.children[ci][attr] == obj[attr] ) {
 		node.children.splice(ci, 1);
 		ci--;
 	    }
 
 	for( var ci = 0; ci < node.leafs.length; ci++ )
-	    if( node.leafs[ci].id == obj.id ) {
+	    if( node.leafs[ci][attr] == obj[attr] ) {
 		node.leafs.splice(ci, 1);
 		ci--;
 	    }
@@ -274,8 +279,8 @@ function QuadTree(x, y, w, h, options) {
 	put: function(obj) {
 	    put(root, obj);
 	},
-	remove: function(obj) {
-	    remove(root, obj);
+	remove: function(obj, attr) {
+	    remove(root, obj, attr);
 	}
     };
 }
