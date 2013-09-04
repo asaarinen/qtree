@@ -81,9 +81,12 @@ qt.remove(obj); // removed
 In fact, `remove` removes all objects with `x, y, w, h` identical to the passed object. If you want to remove only a specific object, you can pass the name of the uniquely identifying property to `remove`:
 
 ```javascript
-var obj = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
-qt.put(obj);
-qt.remove(obj, 'id'); // removed
+var obj1 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
+var obj2 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4234 };
+qt.put(obj1);
+qt.put(obj2);
+qt.remove(obj1, 'id'); // only obj1 removed
+qt.remove(obj1); // obj2 removed
 ```
 
 Please note that despite passing `'id'` as the identifying attribute, the object passed to `put` must still have the same `x, y, w, h` properties as the object to be removed. `remove` traverses the tree similarly as `put`, so if these properties are not the same, it is possible that the object to be removed is not found.
