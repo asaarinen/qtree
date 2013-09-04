@@ -34,8 +34,13 @@ for( var qti = 0; qti < qts.length; qti++ ) {
     var removed3 = {};
     for( var pi = 0; pi < pts.length; pi++ ) {
 	if( Math.random() < 0.1 ) {
-	    assert(qt.remove(pts[pi], 'i') == 1);
-	    assert(qt.remove(pts[pi], 'i') == 0);
+	    if( Math.random() < 0.5 ) {
+		assert(qt.remove(pts[pi]) == 1); // remove without attr 
+		assert(qt.remove(pts[pi], 'i') == 0); // remove with attr
+	    } else {
+		assert(qt.remove(pts[pi], 'i') == 1); // remove with attr
+		assert(qt.remove(pts[pi]) == 0); // remove without attr 
+	    }
 	    removed3[pts[pi].i + ''] = true;
 	}
     }
