@@ -54,11 +54,13 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 	var buf = Math.max(0, Math.random() - 0.25);
 	var result1 = {};
 	qt.get(area, function(obj) {
+	    assert(!result1[obj.i + ''], 'duplicate get return');
 	    result1[obj.i + ''] = true;
 	    return true;
 	});
 	var result2 = {};
 	qt.get(area, 0, function(obj) {
+	    assert(!result2[obj.i + ''], 'duplicate get return');
 	    result2[obj.i + ''] = true;
 	    return true;
 	});
@@ -67,6 +69,7 @@ for( var qti = 0; qti < qts.length; qti++ ) {
 
 	var result3 = {};
 	qt.get(area, buf, function(obj) {
+	    assert(!result3[obj.i + ''], 'duplicate get return');
 	    result3[obj.i + ''] = true;
 	    return true;
 	});
