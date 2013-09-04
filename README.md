@@ -83,8 +83,10 @@ In fact, `remove` removes all objects with `x, y, w, h` identical to the passed 
 ```javascript
 var obj1 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
 var obj2 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4234 };
+
 qt.put(obj1);
 qt.put(obj2);
+
 qt.remove(obj1, 'id'); // only obj1 removed
 qt.remove(obj1); // obj2 removed
 ```
