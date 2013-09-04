@@ -28,11 +28,15 @@ You can also give `QuadTree` some options; currently, the only option is the max
 var qt = QuadTree(0, 0, 100, 100, { maxchildren: 25 }); // defaults to 25
 ```
 
+### Putting objects
+
 Put objects into the quadtree by using `put`. The objects can be anything as long as they have `x, y, w, h` properties as numbers indicating the bounding area of that object:
 
 ```javascript
 qt.put({x: 5, y: 5, w: 0, h: 0, string: 'test'});
 ```
+
+### Getting objects
 
 Iterate over the objects by giving an area and a callback:
 
@@ -63,6 +67,26 @@ qt.get({x: 0, y: 0, dx: 1, dy: 1}, 1, function(obj) {
 Please note it is assumed that `dx, dy` are a 2-d vector normalized to the length of 1. The `dist` property of the object tells the length of the line segment to this direction. If `dist` is undefined or negative, it is assumed to be an infinite line instead of a line segment.
 
 You can also use a buffer threshold when iterating based on a line segment.
+
+### Removing objects
+
+To remove objects, call `remove` with the original object that was passed to `put`:
+
+```javascript
+var obj = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
+qt.put(obj);
+qt.remove(obj); // removed
+```
+
+In fact, `remove` removes all objects with `x, y, w, h` identical to the passed object. If you want to remove only a specific object, you can pass the name of the uniquely identifying property to `remove`:
+
+```javascript
+var obj = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
+qt.put(obj);
+qt.remove(obj, 'id'); // removed
+```
+
+Please note that despite passing `'id'` as the identifying attribute, the object passed to `put` must still have the same `x, y, w, h` properties as the object to be removed. `remove` traverses the tree similarly as `put`, so if these properties are not the same, it is possible that the object to be removed is not found.
 
 License
 ---
