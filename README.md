@@ -38,7 +38,7 @@ qt.put({x: 5, y: 5, w: 0, h: 0, string: 'test'});
 
 ### Getting objects
 
-Iterate over the objects by giving an area and a callback:
+Iterate over the objects by giving an area and a callback. Please note that `get` guarantees that all objects in the given region are given to the callback, but other nearby objects may also be included:
 
 ```javascript
 qt.get({x:0, y: 0, w: 10, h: 10}, function(obj) {
@@ -46,7 +46,7 @@ qt.get({x:0, y: 0, w: 10, h: 10}, function(obj) {
 });	     
 ```
 
-Iterating over objects continues until all of them have been iterated, or the callback function returns `false`.
+Iterating over objects continues as long as there are remaining objects and the callback function returns `true`. If the callback does not return `true`, the iteration is interrupted.
 
 You can also give a buffer threshold, indicating that you want to iterate over all objects in the area expanded by the threshold to all directions:
 
