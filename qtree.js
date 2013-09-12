@@ -247,7 +247,7 @@ function QuadTree(x, y, w, h, options) {
 		    return false;
 	for( var ni = 0; ni < node.nodes.length; ni++ ) {
 	    if( overlapfun(obj, node.nodes[ni], buf) ) {
-		if( !getter(overlapfun, node.nodes[ni], obj, buf, callback) )
+		if( !getter(overlapfun, node.nodes[ni], obj, buf, strict, callback) )
 		    return false;
 	    }
 	}
