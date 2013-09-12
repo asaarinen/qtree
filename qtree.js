@@ -236,13 +236,15 @@ function QuadTree(x, y, w, h, options) {
 
     // iterate through all objects in this node matching given overlap
     // function
-    function getter(overlapfun, node, obj, buf, callback) {
+    function getter(overlapfun, node, obj, buf, strict, callback) {
 	for( var li = 0; li < node.leafs.length; li++ )
-	    if( !callback(node.leafs[li]) )
-		return false;
+	    if( !strict || overlapfun(obj, node.leafs[li], buf) )
+		if( !callback(node.leafs[li]) )
+		    return false;
 	for( var li = 0; li < node.children.length; li++ )
-	    if( !callback(node.children[li]) )
-		return false;
+	    if( !strict || overlapfun(obj, node.children[li], buf) )
+		if( !callback(node.children[li]) )
+		    return false;
 	for( var ni = 0; ni < node.nodes.length; ni++ ) {
 	    if( overlapfun(obj, node.nodes[ni], buf) ) {
 		if( !getter(overlapfun, node.nodes[ni], obj, buf, callback) )
@@ -254,13 +256,13 @@ function QuadTree(x, y, w, h, options) {
 
     // iterate through all objects in this node matching the given rectangle
     function get_rect(node, obj, buf, callback) {
-	return getter(overlap_rect, node, obj, buf, callback);
+	return getter(overlap_rect, node, obj, buf, true, callback);
     }
 
     // iterate through all objects in this node matching the given
     // line (segment)
     function get_line(node, obj, buf, callback) {
-	return getter(overlap_line, node, obj, buf, callback);
+	return getter(overlap_line, node, obj, buf, false, callback);
     }
 
     // iterate through all objects in this node matching given

@@ -38,7 +38,7 @@ qt.put({x: 5, y: 5, w: 0, h: 0, string: 'test'});
 
 ### Getting objects
 
-Iterate over the objects by giving an area and a callback. Please note that `get` guarantees that all objects in the given region are given to the callback, but other nearby objects may also be included:
+Iterate over the objects by giving an area and a callback:
 
 ```javascript
 qt.get({x:0, y: 0, w: 10, h: 10}, function(obj) {
@@ -65,6 +65,8 @@ qt.get({x: 0, y: 0, dx: 1, dy: 1}, 1, function(obj) {
 ```
 
 Please note it is assumed that `dx, dy` are a 2-d vector normalized to the length of 1. The `dist` property of the object tells the length of the line segment to this direction. If `dist` is undefined or negative, it is assumed to be an infinite line instead of a line segment.
+
+Please also note that getting objects close to a line segment will guarantee that all objects close to the line will be iterated over, but other non-overlapping objects may also be returned.
 
 You can also use a buffer threshold when iterating based on a line segment.
 
