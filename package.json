@@ -1,21 +1,21 @@
 {
     "name": "simple-quadtree",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "quadtree data structure",
     "main": "qtree.js",
     "repository": {
 	"type": "git",
-	"url": "https://github.com/asaarinen/qtree.git"
+	    "url": "https://github.com/asaarinen/qtree.git"
     },
     "author": "Antti Saarinen <antti.p.saarinen@gmail.com>",
     "keywords": [
-	"quadtree",
-	"spatial",
-	"tree",
-	"data structure"
+	    "quadtree",
+	    "spatial",
+	    "tree",
+	    "data structure"
     ],
     "scripts": {
-	"test": "node test/test-qtree.js"
+	    "test": "node test/test-qtree.js"
     },
     "license": "MIT",
     "readmeFilename": "README.md",
