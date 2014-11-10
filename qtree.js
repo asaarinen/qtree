@@ -54,7 +54,7 @@ function QuadTree(x, y, w, h, options) {
             h: h,
             c: [],
             l: [],
-            nodes: []
+            n: []
         }
     }
 
@@ -152,13 +152,13 @@ function QuadTree(x, y, w, h, options) {
             leaf = true;
 
         var childnode = null;
-        for( var ni = 0; ni < node.nodes.length; ni++ )
-            if( overlap_rect(obj, node.nodes[ni], 0) ) {
+        for( var ni = 0; ni < node.n.length; ni++ )
+            if( overlap_rect(obj, node.n[ni], 0) ) {
                 if( childnode ) { // multiple hits
                     leaf = true;
                     break;
                 } else
-                    childnode = node.nodes[ni];
+                    childnode = node.n[ni];
             }
         
         return { leaf: leaf,
@@ -215,17 +215,17 @@ function QuadTree(x, y, w, h, options) {
         if( !validate(obj) )
             return;
 
-        if( node.nodes.length == 0 ) {
+        if( node.n.length == 0 ) {
             node.c.push(obj);
             
             // subdivide
             if( node.c.length > maxc ) {
                 var w2 = node.w / 2;
                 var h2 = node.h / 2;
-                node.nodes.push(createnode(node.x, node.y, w2, h2),
-                                createnode(node.x + w2, node.y, w2, h2),
-                                createnode(node.x, node.y + h2, w2, h2),
-                                createnode(node.x + w2, node.y + h2, w2, h2));
+                node.n.push(createnode(node.x, node.y, w2, h2),
+                            createnode(node.x + w2, node.y, w2, h2),
+                            createnode(node.x, node.y + h2, w2, h2),
+                            createnode(node.x + w2, node.y + h2, w2, h2));
                 for( var ci = 0; ci < node.c.length; ci++ ) 
                     put_to_nodes(node, node.c[ci]);
                 node.c = [];
@@ -245,9 +245,9 @@ function QuadTree(x, y, w, h, options) {
             if( !strict || overlapfun(obj, node.c[li], buf) )
                 if( !callback(node.c[li]) )
                     return false;
-        for( var ni = 0; ni < node.nodes.length; ni++ ) {
-            if( overlapfun(obj, node.nodes[ni], buf) ) {
-                if( !getter(overlapfun, node.nodes[ni], obj, buf, strict, callback) )
+        for( var ni = 0; ni < node.n.length; ni++ ) {
+            if( overlapfun(obj, node.n[ni], buf) ) {
+                if( !getter(overlapfun, node.n[ni], obj, buf, strict, callback) )
                     return false;
             }
         }
