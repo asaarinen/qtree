@@ -299,6 +299,33 @@ function QuadTree(x, y, w, h, options) {
         },
         remove: function(obj, attr) {
             return remove(root, obj, attr);
+        },
+        stringify: function() {
+            var strobj = {
+                x: x, y: y, w: w, h: h,
+                maxchildren: maxchildren, 
+                leafratio: leafratio,
+                root: root
+            };
+            try {
+                return JSON.stringify(strobj);
+            } catch(err) {
+                // could not stringify
+                // probably due to objects included in qtree being non-stringifiable
+                return null; 
+            }
+        },
+        parse: function(str) {
+            if( typeof str == 'string' )
+                str = JSON.parse(str);
+            
+            x = str.x;
+            y = str.y;
+            w = str.w;
+            h = str.h;
+            maxchildren = str.maxchildren;
+            leafratio = str.leafratio;
+            root = str.root;
         }
     };
 }
