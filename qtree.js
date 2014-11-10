@@ -9,12 +9,12 @@ function QuadTree(x, y, w, h, options) {
     if( typeof h != 'number' || isNaN(h) )
         h = 10;
     
-    var maxchildren = 25;
+    var maxc = 25;
     var leafratio = 0.5;
     if( options ) {
         if( typeof options.maxchildren == 'number' )
             if( options.maxchildren > 0 )
-                maxchildren = options.maxchildren;
+                maxc = options.maxchildren;
         if( typeof options.leafratio == 'number' )
             if( options.leafratio >= 0 )
                 leafratio = options.leafratio;
@@ -52,8 +52,8 @@ function QuadTree(x, y, w, h, options) {
             y: y,
             w: w,
             h: h,
-            children: [],
-            leafs: [],
+            c: [],
+            l: [],
             nodes: []
         }
     }
@@ -169,7 +169,7 @@ function QuadTree(x, y, w, h, options) {
     function put_to_nodes(node, obj) {
         var leaf = isleaf(node, obj);
         if( leaf )
-            node.leafs.push(obj);
+            node.l.push(obj);
         else if( leaf.childnode )
             put(leaf.childnode, obj);
         else
@@ -187,19 +187,19 @@ function QuadTree(x, y, w, h, options) {
             attr = 'id';
 
         var count = 0;
-        for( var ci = 0; ci < node.children.length; ci++ )
-            if( ( attr && node.children[ci][attr] == obj[attr] ) ||
-                ( !attr && isequal(node.children[ci], obj) ) ) {
+        for( var ci = 0; ci < node.c.length; ci++ )
+            if( ( attr && node.c[ci][attr] == obj[attr] ) ||
+                ( !attr && isequal(node.c[ci], obj) ) ) {
                 count++;
-                node.children.splice(ci, 1);
+                node.c.splice(ci, 1);
                 ci--;
             }
 
-        for( var ci = 0; ci < node.leafs.length; ci++ )
-            if( ( attr && node.leafs[ci][attr] == obj[attr] ) ||
-                ( !attr && isequal(node.leafs[ci], obj) ) ) {
+        for( var ci = 0; ci < node.l.length; ci++ )
+            if( ( attr && node.l[ci][attr] == obj[attr] ) ||
+                ( !attr && isequal(node.l[ci], obj) ) ) {
                 count++;
-                node.leafs.splice(ci, 1);
+                node.l.splice(ci, 1);
                 ci--;
             }
 
@@ -216,19 +216,19 @@ function QuadTree(x, y, w, h, options) {
             return;
 
         if( node.nodes.length == 0 ) {
-            node.children.push(obj);
+            node.c.push(obj);
             
             // subdivide
-            if( node.children.length > maxchildren ) {
+            if( node.c.length > maxc ) {
                 var w2 = node.w / 2;
                 var h2 = node.h / 2;
                 node.nodes.push(createnode(node.x, node.y, w2, h2),
                                 createnode(node.x + w2, node.y, w2, h2),
                                 createnode(node.x, node.y + h2, w2, h2),
                                 createnode(node.x + w2, node.y + h2, w2, h2));
-                for( var ci = 0; ci < node.children.length; ci++ ) 
-                    put_to_nodes(node, node.children[ci]);
-                node.children = [];
+                for( var ci = 0; ci < node.c.length; ci++ ) 
+                    put_to_nodes(node, node.c[ci]);
+                node.c = [];
             }
         } else 
             put_to_nodes(node, obj);
@@ -237,13 +237,13 @@ function QuadTree(x, y, w, h, options) {
     // iterate through all objects in this node matching given overlap
     // function
     function getter(overlapfun, node, obj, buf, strict, callback) {
-        for( var li = 0; li < node.leafs.length; li++ )
-            if( !strict || overlapfun(obj, node.leafs[li], buf) )
-                if( !callback(node.leafs[li]) )
+        for( var li = 0; li < node.l.length; li++ )
+            if( !strict || overlapfun(obj, node.l[li], buf) )
+                if( !callback(node.l[li]) )
                     return false;
-        for( var li = 0; li < node.children.length; li++ )
-            if( !strict || overlapfun(obj, node.children[li], buf) )
-                if( !callback(node.children[li]) )
+        for( var li = 0; li < node.c.length; li++ )
+            if( !strict || overlapfun(obj, node.c[li], buf) )
+                if( !callback(node.c[li]) )
                     return false;
         for( var ni = 0; ni < node.nodes.length; ni++ ) {
             if( overlapfun(obj, node.nodes[ni], buf) ) {
@@ -303,7 +303,7 @@ function QuadTree(x, y, w, h, options) {
         stringify: function() {
             var strobj = {
                 x: x, y: y, w: w, h: h,
-                maxchildren: maxchildren, 
+                maxc: maxc, 
                 leafratio: leafratio,
                 root: root
             };
@@ -323,7 +323,7 @@ function QuadTree(x, y, w, h, options) {
             y = str.y;
             w = str.w;
             h = str.h;
-            maxchildren = str.maxchildren;
+            maxc = str.maxc;
             leafratio = str.leafratio;
             root = str.root;
         }
