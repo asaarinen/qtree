@@ -1,3 +1,12 @@
+/**
+*
+* simple-quadtree is a minimal quadtree implementation that supports simple put, get,
+* remove and clear operations on objects having a x, y position and w, h dimension.
+*
+* Copyright (c) 2013 Antti Saarinen <antti.p.saarinen@gmail.com>
+* https://github.com/asaarinen/qtree
+*
+*/
 function QuadTree(x, y, w, h, options) {
 
     if( typeof x != 'number' || isNaN(x) )
@@ -236,18 +245,24 @@ function QuadTree(x, y, w, h, options) {
 
     // iterate through all objects in this node matching given overlap
     // function
-    function getter(overlapfun, node, obj, buf, strict, callback) {
+    function getter(overlapfun, node, obj, buf, strict, callbackOrArray) {
         for( var li = 0; li < node.l.length; li++ )
             if( !strict || overlapfun(obj, node.l[li], buf) )
-                if( !callback(node.l[li]) )
+                if( typeof callbackOrArray == 'object' )
+                    callbackOrArray.push(node.l[li]);
+                else if( !callbackOrArray(node.l[li]) )
                     return false;
         for( var li = 0; li < node.c.length; li++ )
             if( !strict || overlapfun(obj, node.c[li], buf) )
-                if( !callback(node.c[li]) )
+                if( typeof callbackOrArray == 'object' )
+                    callbackOrArray.push(node.c[li]);
+                else if( !callbackOrArray(node.c[li]) )
                     return false;
         for( var ni = 0; ni < node.n.length; ni++ ) {
             if( overlapfun(obj, node.n[ni], buf) ) {
-                if( !getter(overlapfun, node.n[ni], obj, buf, strict, callback) )
+                if( typeof callbackOrArray == 'object' )
+                    callbackOrArray.concat(getter(overlapfun, node.n[ni], obj, buf, strict, callbackOrArray));
+                else if( !getter(overlapfun, node.n[ni], obj, buf, strict, callbackOrArray) )
                     return false;
             }
         }
@@ -255,50 +270,58 @@ function QuadTree(x, y, w, h, options) {
     }
 
     // iterate through all objects in this node matching the given rectangle
-    function get_rect(node, obj, buf, callback) {
-        return getter(overlap_rect, node, obj, buf, true, callback);
+    function get_rect(node, obj, buf, callbackOrArray) {
+        return getter(overlap_rect, node, obj, buf, true, callbackOrArray);
     }
 
     // iterate through all objects in this node matching the given
     // line (segment)
-    function get_line(node, obj, buf, callback) {
-        return getter(overlap_line, node, obj, buf, false, callback);
+    function get_line(node, obj, buf, callbackOrArray) {
+        return getter(overlap_line, node, obj, buf, false, callbackOrArray);
     }
 
     // iterate through all objects in this node matching given
     // geometry, either a rectangle or a line segment
-    function get(node, obj, buf, callback) {
+    function get(node, obj, buf, callbackOrArray) {
 
-        if( typeof buf == 'function' && typeof callback == 'undefined' ) {
-            callback = buf;
+        if( typeof buf == 'function' && typeof callbackOrArray == 'undefined' ) {
+            callbackOrArray = buf;
+            buf = 0;
+        }
+        if( typeof callbackOrArray == 'undefined' ) {
+            callbackOrArray = [];
             buf = 0;
         }
         if( obj == null )
-            get_rect(node, obj, buf, callback);
+            get_rect(node, obj, buf, callbackOrArray);
         else if( typeof obj.x == 'number' &&
                  typeof obj.y == 'number' &&
                  !isNaN(obj.x) && !isNaN(obj.y) ) {
             if( typeof obj.dx == 'number' &&
                 typeof obj.dy == 'number' &&
                 !isNaN(obj.dx) && !isNaN(obj.dy) )
-                get_line(node, obj, buf, callback);
+                get_line(node, obj, buf, callbackOrArray);
             else if( typeof obj.w == 'number' &&
                      typeof obj.h == 'number' &&
                      !isNaN(obj.w) && !isNaN(obj.h) )
-                get_rect(node, obj, buf, callback);
+                get_rect(node, obj, buf, callbackOrArray);
         }
+        if( typeof callbackOrArray == "object" ) return callbackOrArray;
     }
 
     // return the object interface
     return {
-        get: function(obj, buf, callback) {
-            get(root, obj, buf, callback);
+        get: function(obj, buf, callbackOrArray) {
+            return get(root, obj, buf, callbackOrArray);
         },
         put: function(obj) {
             put(root, obj);
         },
         remove: function(obj, attr) {
             return remove(root, obj, attr);
+        },
+        clear: function() {
+            root = createnode(x, y, w, h);
         },
         stringify: function() {
             var strobj = {

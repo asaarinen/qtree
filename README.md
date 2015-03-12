@@ -1,7 +1,7 @@
 simple-quadtree
 =====
 
-`simple-quadtree` is a minimal quadtree implementation that supports simple `put`, `get` and `remove` operations on objects having a `x, y` position and `w, h` dimension. 
+`simple-quadtree` is a minimal quadtree implementation that supports simple `put`, `get`, `remove` and `clear` operations on objects having a `x, y` position and `w, h` dimension. 
 
 Installation
 ---
@@ -43,10 +43,17 @@ Iterate over the objects by giving an area and a callback:
 ```javascript
 qt.get({x:0, y: 0, w: 10, h: 10}, function(obj) {
     // obj == {x: 5, y: 5, w: 0, h: 0, string: 'test'}
-});	     
+});
 ```
 
 Iterating over objects continues as long as there are remaining objects and the callback function returns `true`. If the callback does not return `true`, the iteration is interrupted.
+
+Alternatively you can omit the callback to return an array of all matching objects:
+
+```javascript
+var result = qt.get({x:0, y: 0, w: 10, h: 10});
+    // result == [{x: 5, y: 5, w: 0, h: 0, string: 'test'}]
+```
 
 You can also give a buffer threshold, indicating that you want to iterate over all objects in the area expanded by the threshold to all directions:
 
@@ -94,6 +101,16 @@ qt.remove(obj1); // obj2 removed
 ```
 
 Please note that despite passing `'id'` as the identifying attribute, the object passed to `put` must still have the same `x, y, w, h` properties as the object to be removed. `remove` traverses the tree similarly as `put`, so if these properties are not the same, it is possible that the object to be removed is not found.
+
+### Clearing the quadtree
+
+To clear the quadtree call clear:
+
+```
+qt.clear();
+```
+
+This creates a new root node effectively putting the existing one up for garbage collection.
 
 License
 ---
