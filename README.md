@@ -36,6 +36,8 @@ Put objects into the quadtree by using `put`. The objects can be anything as lon
 qt.put({x: 5, y: 5, w: 0, h: 0, string: 'test'});
 ```
 
+Each `w` and `h` property must be nonnegative.
+
 ### Getting objects
 
 Iterate over the objects by giving an area and a callback:
@@ -77,6 +79,29 @@ Please also note that getting objects close to a line segment will guarantee tha
 
 You can also use a buffer threshold when iterating based on a line segment.
 
+### Modifying objects
+
+In order to remove or update an object already in the quadtree, you have to identify the object. By default, `update` and `remove` affect all objects with `x, y, w, h` identical to the passed object. 
+
+If you want to remove only a specific object, you can should pass the name of the uniquely identifying property to `update` and `remove`.
+
+### Updating objects
+
+If the coordinates of an object already put into the quadtree change, you should call `update` to make sure it is still indexed in the right location:
+
+```javascript
+var obj = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
+qt.put(obj);
+
+assert(obj.x == 5);
+qt.update(obj, 'id', { x: 10 }); // change obj.x to 10
+assert(obj.x == 10); 
+```
+
+Call to `update` also modifies the coordinates of the object to be updated, and returns `true` if the object was correctly updated and `false` if the object to be updated was not found.
+
+Please note that despite passing `'id'` as the identifying attribute, the object passed to `update` must still have the same `x, y, w, h` properties as the original inserted object. `update` traverses the tree similarly as `put`, so if these properties are not the same, it is possible that the object to be updated is not found.
+
 ### Removing objects
 
 To remove objects, call `remove` with the original object that was passed to `put`:
@@ -84,18 +109,15 @@ To remove objects, call `remove` with the original object that was passed to `pu
 ```javascript
 var obj = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
 qt.put(obj);
-qt.remove(obj); // removed
-```
+qt.remove(obj); // remove all objects with matching coordinates
 
-In fact, `remove` removes all objects with `x, y, w, h` identical to the passed object. If you want to remove only a specific object, you can pass the name of the uniquely identifying property to `remove`:
-
-```javascript
 var obj1 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4233 };
 var obj2 = { x: 5, y: 5, w: 0, h: 0, string: 'test', id: 4234 };
 
 qt.put(obj1);
 qt.put(obj2);
 
+// remove by uniquely identifying attribute
 qt.remove(obj1, 'id'); // only obj1 removed
 qt.remove(obj1); // obj2 removed
 ```

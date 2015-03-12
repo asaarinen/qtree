@@ -41,6 +41,8 @@ function QuadTree(x, y, w, h, options) {
         if( isNaN(obj.x) || isNaN(obj.y) ||
             isNaN(obj.w) || isNaN(obj.h) )
             return false;
+        if( obj.w < 0 || obj.h < 0 )
+            return false;
         return true;
     }
 
@@ -184,6 +186,77 @@ function QuadTree(x, y, w, h, options) {
         else
             return;
     }
+    
+    function update_coords(obj, updatedcoords) {
+        obj.x = ((typeof updatedcoords.x == 'number') ? updatedcoords.x : obj.x);
+        obj.y = ((typeof updatedcoords.y == 'number') ? updatedcoords.y : obj.y);
+        obj.w = ((typeof updatedcoords.w == 'number') ? updatedcoords.w : obj.w);
+        obj.h = ((typeof updatedcoords.h == 'number') ? updatedcoords.h : obj.h);
+    }
+
+    function update(node, obj, attr, updatedcoords) {
+        if( typeof attr == 'object' && typeof updatedcoords == 'undefined' ) {
+            updatedcoords = attr;
+            attr = false;
+        }
+
+        if( !validate(obj) || typeof updatedcoords == 'undefined' )
+            return false;
+
+        if( !attr )
+            attr = false;
+        else if( typeof attr != 'string' )
+            attr = 'id';
+
+        var count = 0;
+        for( var ci = 0; ci < node.c.length; ci++ )
+            if( ( attr && node.c[ci][attr] == obj[attr] ) ||
+                ( !attr && isequal(node.c[ci], obj) ) ) {
+
+                // found the object to be updated
+                var orig = node.c[ci];
+                update_coords(orig, updatedcoords);
+                
+                if( orig.x > node.x + node.w ||
+                    orig.y > node.y + node.h ||
+                    orig.x + orig.w < node.x ||
+                    orig.y + orig.h < node.y ) {
+
+                    // this object needs to be removed and added
+                    node.c.splice(ci, 1);
+                    put(root, orig);
+                } // updated object is still inside same node
+                
+                return true;
+            }
+        
+        for( var ci = 0; ci < node.l.length; ci++ )
+            if( ( attr && node.l[ci][attr] == obj[attr] ) ||
+                ( !attr && isequal(node.l[ci], obj) ) ) {
+                
+                var orig = node.l[ci];
+                update_coords(orig, updatedcoords);
+                
+                // found the object to be updated
+                if( orig.x > node.x + node.w ||
+                    orig.y > node.y + node.h ||
+                    orig.x + orig.w < node.x ||
+                    orig.y + orig.h < node.y ) {
+
+                    // this object needs to be removed and added 
+                    node.l.splice(ci, 1);
+                    put(root, orig);
+                } // updated object is still inside same node
+                
+                return true;
+            }
+
+        var leaf = isleaf(node, obj);
+        if( !leaf.leaf && leaf.childnode )
+            if( update(leaf.childnode, obj, attr) )
+                return true;
+        return false;
+    }
 
     // remove an object from this node
     function remove(node, obj, attr) {
@@ -219,7 +292,7 @@ function QuadTree(x, y, w, h, options) {
     }
 
     // put an object to this node
-    function put(node, obj, removeflag) {
+    function put(node, obj) {
 
         if( !validate(obj) )
             return;
@@ -284,7 +357,7 @@ function QuadTree(x, y, w, h, options) {
     // geometry, either a rectangle or a line segment
     function get(node, obj, buf, callbackOrArray) {
 
-        if( typeof buf == 'function' && typeof callbackOrArray == 'undefined' ) {
+        if( (typeof buf == 'function' || typeof buf == 'object') && typeof callbackOrArray == 'undefined' ) {
             callbackOrArray = buf;
             buf = 0;
         }
@@ -306,7 +379,8 @@ function QuadTree(x, y, w, h, options) {
                      !isNaN(obj.w) && !isNaN(obj.h) )
                 get_rect(node, obj, buf, callbackOrArray);
         }
-        if( typeof callbackOrArray == "object" ) return callbackOrArray;
+        if( typeof callbackOrArray == 'object' ) 
+            return callbackOrArray;
     }
 
     // return the object interface
@@ -316,6 +390,9 @@ function QuadTree(x, y, w, h, options) {
         },
         put: function(obj) {
             put(root, obj);
+        },
+        update: function(obj, attr, updatedcoords) {
+            return update(root, obj, attr, updatedcoords);
         },
         remove: function(obj, attr) {
             return remove(root, obj, attr);
