@@ -1,3 +1,12 @@
+/**
+*
+* simple-quadtree is a minimal quadtree implementation that supports simple put, get,
+* remove and clear operations on objects having a x, y position and w, h dimension.
+*
+* Copyright (c) 2013 Antti Saarinen <antti.p.saarinen@gmail.com>
+* https://github.com/asaarinen/qtree
+*
+*/
 function QuadTree(x, y, w, h, options) {
 
     if( typeof x != 'number' || isNaN(x) )
