@@ -179,7 +179,7 @@ function QuadTree(x, y, w, h, options) {
     // put an object to one of the child nodes of this node
     function put_to_nodes(node, obj) {
         var leaf = isleaf(node, obj);
-        if( leaf )
+        if( leaf.leaf )
             node.l.push(obj);
         else if( leaf.childnode )
             put(leaf.childnode, obj);
